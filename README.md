@@ -93,6 +93,7 @@ GROUP BY
         WHEN current_age >= retirement_age THEN 'Retired'
         ELSE 'Not retired'
         END;
+
 ```
 
 ### Insights
@@ -138,7 +139,35 @@ ON CS.id = IB.id
 GROUP BY Income_category
 ORDER BY Avg_spent DESC;
 
+
+2.
+SELECT 
+  u.gender,
+  ROUND(AVG(yearly_income), 2) AS avg_income,
+  SUM(t.amount) AS total_spend,
+    COUNT(*)
+FROM transactions t
+JOIN Users u ON u.id = t.client_id
+GROUP BY u.gender
+ORDER BY total_spend DESC
+
 ```
+
+
+### Insights
+1. Income Brackets:
+- The majority of users (1,399) fall into the middle-income bracket, making up the core of Aurora Bank’s customer base.
+- This is followed by upper-middle income earners (543), while only 52 users fall into the high-income bracket, indicating a relatively small affluent segment.
+- Low-income earners represent the smallest group, suggesting the bank's services may be underutilized by lower-income demographics.
+
+2. Gender-Based Income Comparison:
+- On average, female users earn slightly more than male users, though the difference is marginal.
+- This suggests income parity within the customer base, but also highlights the potential to further analyze income vs. financial behavior by gender.
+
+3 Age vs. Average Income:
+- Income peaks in the 18–24 age group, with an average income of ₦48,359, followed closely by the 46–55 and 25–35 age groups.
+- A gradual decline in income is observed as age increases beyond 55, with the lowest average income among users aged 75 and above.
+
 ### Spending Patterns
 This section analyzes how customers are spending their money both by merchant category (MCC) and by location (city/state). The goal is to identify the most active transaction categories and geographic areas to understand customer behavior, product preferences, and potential revenue-driving segments.
 
@@ -168,6 +197,52 @@ CROSS APPLY STRING_SPLIT(MC.[Description], ',')
 GROUP BY TRIM(VALUE)
 ORDER BY total_spent DESC;
 
+-3. SPENDING BASED ON INCOME 
+SELECT 
+     CASE 
+          WHEN yearly_income < 20000 THEN 'Low income earners (<20K)'
+          WHEN yearly_income BETWEEN 20000 AND 50000 THEN 'Middle income earners(20k-50k)'
+         WHEN yearly_income BETWEEN 50000 AND 100000 THEN 'Upper middle income earners(50-100k)'
+        ELSE 'High income earners(>100k)'
+    END AS Income_category,
+  ROUND(SUM(t.amount), 2) AS total_spent
+FROM transactions t
+JOIN Users u ON t.client_id = u.id
+GROUP BY
+     CASE 
+         WHEN yearly_income < 20000 THEN 'Low income earners (<20K)'
+         WHEN yearly_income BETWEEN 20000 AND 50000 THEN 'Middle income earners(20k-50k)'
+         WHEN yearly_income BETWEEN 50000 AND 100000 THEN 'Upper middle income earners(50-100k)'
+        ELSE 'High income earners(>100k)'
+    END
+ORDER BY total_spent DESC;
+
+
+WITH income_vs_spend AS(
+    SELECT
+        U.gender,
+        U.yearly_income,
+        T.amount,   
+    CASE
+        WHEN current_age BETWEEN 18 AND 24 THEN '18-24'
+        WHEN current_age BETWEEN 25 AND 35 THEN '25-35'
+        WHEN current_age BETWEEN 26 AND 45 THEN '26-45'
+        WHEN current_age BETWEEN 46 AND 55 THEN '46-55'
+        WHEN current_age BETWEEN 56 AND 65 THEN '56-65'
+        WHEN current_age BETWEEN 66 AND 75 THEN '66-75'
+        ELSE '75+'
+    END AS Age_group
+FROM Users U
+JOIN Transactions T
+ON U.id = T.client_id
+)
+SELECT 
+    gender,
+    age_group,
+    SUM(amount) AS total_spent
+FROM income_vs_spend 
+GROUP BY gender, age_group 
+ORDER BY total_spent DESC;    
 ```
 
 ### Insights
@@ -178,6 +253,11 @@ ORDER BY total_spent DESC;
 - Users are geographically distributed across a wide range of cities, with high transaction volumes recorded in major hubs such as Houston, Orlando, Atlanta, San Diego, Seattle, Dallas, and New York.
 
 - Several mid-sized and suburban cities like Yorba Linda, Crown Point, and Williston Park also appear in the top 50, suggesting widespread adoption of the bank’s services beyond just large metropolitan areas.
+
+
+## Credit Risk Analysis
+
+
 
 
 
