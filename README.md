@@ -2,7 +2,7 @@
 
 This project is a comprehensive SQL-based data analysis initiative designed to extract insights from the operations and customers of a fictional digital bank. This project explores transaction behaviors, error patterns, customer risk profiles, and potential fraud signals using multiple datasets.
 
-## Objectives:
+## Objectives
 
 * Analyze customer demographics including age, gender, and income. 
 * Evaluate spending patterns across merchant categories (MCC) and locations.
